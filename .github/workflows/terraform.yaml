@@ -16,18 +16,26 @@ jobs:
 
       - name: setup
         uses: hashicorp/setup-terraform@v1
+        env:
+          TF_ACTION_WORKING_DIR: 'terraform'
 
       - name: format
         id: fmt
         run: terraform fmt -check
+        env:
+          TF_ACTION_WORKING_DIR: 'terraform'
 
       - name: initialize
         id: init
-        run: terraform init
+        run: terraform init -backend-config="bucket=${{ context.repo.repo }}" --backend-config="key=${{ steps.extract_branch.outputs.branch }}" --backend-config="region=us-west-2"
+        env:
+          TF_ACTION_WORKING_DIR: 'terraform'
 
       - name: validate
         id: validate
         run: terraform validate -no-color
+        env:
+          TF_ACTION_WORKING_DIR: 'terraform'
 
       # runs on pull requests
       # generates a plan on the pull request and applies the plan when merged
@@ -37,6 +45,8 @@ jobs:
         if: github.event_name == 'pull_request'
         run: terraform plan -no-color -input=false
         continue-on-error: true
+        env:
+          TF_ACTION_WORKING_DIR: 'terraform'
 
       - name: comment on pull request
         uses: actions/github-script@v6
@@ -76,3 +86,5 @@ jobs:
       - name: apply
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         run: terraform apply -auto-approve -input=false
+        env:
+          TF_ACTION_WORKING_DIR: 'terraform'
