@@ -29,9 +29,9 @@ jobs:
 
       - name: create bucket if not exists
         run: |
-          if [[ aws s3api head-bucket --bucket "$S3_BUCKET" 2>/dev/null ]]
-          then
-            aws s3api create-bucket "$S3_BUCKET"
+          if [[ aws s3api head-bucket --bucket "$S3_BUCKET" 2>/dev/null ]] \
+          then \
+            aws s3api create-bucket "$S3_BUCKET" \
           fi
 
   terraform:
