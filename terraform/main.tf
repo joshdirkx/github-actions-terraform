@@ -6,8 +6,8 @@ terraform {
   }
 
   backend "s3" {
-    bucket = vars.s3_bucket_name
-    key    = vars.s3_bucket_key
+    bucket = "terraform_state/${vars.git_hub_repository}"
+    key    = vars.git_hub_branch
     region = vars.aws_region
   }
 }

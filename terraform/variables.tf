@@ -3,12 +3,9 @@ variable "aws_region" {
   description = "region to deploy aws resources into"
 }
 
-variable "s3_bucket_name" {
-  default     = "bucket"
-  description = "region to deploy aws resources into"
+variable "git_hub_repository" {
+  description = "github repository"
 }
-
-variable "s3_bucket_key" {
-  default     = "key"
-  description = "region to deploy aws resources into"
+variable "git_hub_branch" {
+  description = "github branch"
 }
