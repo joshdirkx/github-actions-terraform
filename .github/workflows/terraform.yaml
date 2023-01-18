@@ -24,9 +24,6 @@ jobs:
       - name: initialize
         id: init
         run: terraform init
-        env:
-          # declare the working directory for terraform within this repository
-          TF_ACTION_WORKING_DIR: 'terraform'
 
       - name: validate
         id: validate
