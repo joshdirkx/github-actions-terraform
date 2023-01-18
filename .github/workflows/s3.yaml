@@ -1,0 +1,26 @@
+name: create s3 bucket for terraform state
+
+env:
+  AWS_ACCESS_KEY_ID:  ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY:  ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  AWS_DEFAULT_REGION: us-west-2
+  S3_BUCKET: supertesttest
+
+on:
+  branches:
+    - main
+  pull_request:
+
+jobs:
+  create_bucket:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v3
+
+      - name: create bucket if not exists
+        run: |
+          if [[ aws s3api head-bucket --bucket "$S3_BUCKET" 2>/dev/null ]]
+          then
+            aws s3api create-bucket "$S3_BUCKET"
+          fi
