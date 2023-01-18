@@ -14,65 +14,65 @@ jobs:
       - name: checkout
         uses: actions/checkout@v3
 
-    - name: setup
-      uses: hashicorp/setup-terraform@v1
+      - name: setup
+        uses: hashicorp/setup-terraform@v1
 
-    - name: format
-      id: fmt
-      run: terraform fmt -check
+      - name: format
+        id: fmt
+        run: terraform fmt -check
 
-    - name: initialize
-      id: init
-      run: terraform init
+      - name: initialize
+        id: init
+        run: terraform init
 
-    - name: validate
-      id: validate
-      run: terraform validate -no-color
+      - name: validate
+        id: validate
+        run: terraform validate -no-color
 
-    # runs on pull requests
-    # generates a plan on the pull request and applies the plan when merged
-    # continues on error so the results can be displayed
-    - name: plan
-      id: plan
-      if: github.event_name == 'pull_request'
-      run: terraform plan -no-color -input=false
-      continue-on-error: true
+      # runs on pull requests
+      # generates a plan on the pull request and applies the plan when merged
+      # continues on error so the results can be displayed
+      - name: plan
+        id: plan
+        if: github.event_name == 'pull_request'
+        run: terraform plan -no-color -input=false
+        continue-on-error: true
 
-    - name: comment on pull request
-      uses: actions/github-script@v6
-      if: github.event_name == 'pull_request'
-      env:
-        PLAN: "terraform\n${{ steps.plan.outputs.stdout }}"
-      with:
-        github-token: ${{ secrets.GITHUB_TOKEN }}
-        script: |
-          const output = `#### Terraform Format and Style 🖌\`${{ steps.fmt.outcome }}\`
-          #### Terraform Initialization ⚙️\`${{ steps.init.outcome }}\`
-          #### Terraform Plan 📖\`${{ steps.plan.outcome }}\`
-          #### Terraform Validation 🤖\`${{ steps.validate.outcome }}\`
+      - name: comment on pull request
+        uses: actions/github-script@v6
+        if: github.event_name == 'pull_request'
+        env:
+          PLAN: "terraform\n${{ steps.plan.outputs.stdout }}"
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const output = `#### Terraform Format and Style 🖌\`${{ steps.fmt.outcome }}\`
+            #### Terraform Initialization ⚙️\`${{ steps.init.outcome }}\`
+            #### Terraform Plan 📖\`${{ steps.plan.outcome }}\`
+            #### Terraform Validation 🤖\`${{ steps.validate.outcome }}\`
 
-          <details><summary>Show Plan</summary>
+            <details><summary>Show Plan</summary>
 
-          \`\`\`\n
-          ${process.env.PLAN}
-          \`\`\`
+            \`\`\`\n
+            ${process.env.PLAN}
+            \`\`\`
 
-          </details>
+            </details>
 
-          *Pushed by: @${{ github.actor }}, Action: \`${{ github.event_name }}\`*`;
+            *Pushed by: @${{ github.actor }}, Action: \`${{ github.event_name }}\`*`;
 
-          github.rest.issues.createComment({
-            issue_number: context.issue.number,
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            body: output
-          })
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: output
+            })
 
-    # if the plan step failed, bail out now that we commented on the pull request
-    - name: plan status
-      if: steps.plan.outcome == 'failure'
-      run: exit 1
+      # if the plan step failed, bail out now that we commented on the pull request
+      - name: plan status
+        if: steps.plan.outcome == 'failure'
+        run: exit 1
 
-    - name: apply
-      if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-      run: terraform apply -auto-approve -input=false
+      - name: apply
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        run: terraform apply -auto-approve -input=false
