@@ -7,8 +7,9 @@ env:
   S3_BUCKET: supertesttest
 
 on:
-  branches:
-    - main
+  push:
+    branches:
+      - main
   pull_request:
 
 jobs:
