@@ -13,6 +13,8 @@ on:
 jobs:
   extract_branch_name:
     runs-on: ubuntu-latest
+    outputs:
+      branch_name: ${{ steps.extract_branch.outputs.branch_name }}
     steps:
       - name: extract branch name
         shell: bash
@@ -51,8 +53,7 @@ jobs:
 
       - name: initialize
         id: init
-        run: terraform init -backend-config="bucket=${{ github.event.repository.name }}" --backend-config="key=${{ jobs.create_bucket.steps.extract_branch.outputs.branch }}" --backend-config="region=us-west-2"
-
+        run: terraform init -backend-config="bucket=${{ github.event.repository.name }}" --backend-config="key=${{ needs.create_bucket.extract_branch.outputs.branch_name }}" --backend-config="region=us-west-2"
 
       - name: validate
         id: validate
