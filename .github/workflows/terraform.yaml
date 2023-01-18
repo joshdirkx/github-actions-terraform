@@ -9,6 +9,9 @@ on:
 jobs:
   terraform:
     name: run terraform
+    defaults:
+      run:
+        working-directory: ./terraform
     runs-on: ubuntu-latest
     steps:
       - name: checkout
@@ -21,22 +24,18 @@ jobs:
 
       - name: setup
         uses: hashicorp/setup-terraform@v1
-        working-directory: ./terraform
 
       - name: format
         id: fmt
         run: terraform fmt -check
-        working-directory: ./terraform
 
       - name: initialize
         id: init
         run: terraform init -backend-config="bucket=${{ github.event.repository.name }}" --backend-config="key=${{ steps.extract_branch.outputs.branch }}" --backend-config="region=us-west-2"
-        working-directory: ./terraform
 
       - name: validate
         id: validate
         run: terraform validate -no-color
-        working-directory: ./terraform
 
       # runs on pull requests
       # generates a plan on the pull request and applies the plan when merged
@@ -46,7 +45,6 @@ jobs:
         if: github.event_name == 'pull_request'
         run: terraform plan -no-color -input=false
         continue-on-error: true
-        working-directory: ./terraform
 
       - name: comment on pull request
         uses: actions/github-script@v6
@@ -86,4 +84,3 @@ jobs:
       - name: apply
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         run: terraform apply -auto-approve -input=false
-        working-directory: ./terraform
