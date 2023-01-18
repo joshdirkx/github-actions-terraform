@@ -27,7 +27,7 @@ jobs:
 
       - name: initialize
         id: init
-        run: terraform init -backend-config="bucket=${{ context.repo.repo }}" --backend-config="key=${{ steps.extract_branch.outputs.branch }}" --backend-config="region=us-west-2"
+        run: terraform init -backend-config="bucket=${{ github.event.repository.name }}" --backend-config="key=${{ steps.extract_branch.outputs.branch }}" --backend-config="region=us-west-2"
         env:
           TF_ACTION_WORKING_DIR: 'terraform'
 
