@@ -11,29 +11,6 @@ on:
   pull_request:
 
 jobs:
-  extract_branch_name:
-    runs-on: ubuntu-latest
-    outputs:
-      branch_name: ${{ steps.extract_branch.outputs.branch_name }}
-    steps:
-      - name: extract branch name
-        shell: bash
-        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
-        id: extract_branch
-
-  create_bucket:
-    runs-on: ubuntu-latest
-    steps:
-      - name: checkout
-        uses: actions/checkout@v3
-
-      - name: create bucket if not exists
-        run: |
-          if [[ aws s3api head-bucket --bucket "$S3_BUCKET" 2>/dev/null ]] \
-          then \
-            aws s3api create-bucket "$S3_BUCKET" \
-          fi
-
   terraform:
     name: run terraform
     defaults:
@@ -44,6 +21,11 @@ jobs:
       - name: checkout
         uses: actions/checkout@v3
 
+      - name: extract branch name
+        shell: bash
+        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+        id: extract_branch
+
       - name: setup
         uses: hashicorp/setup-terraform@v1
 
@@ -53,7 +35,8 @@ jobs:
 
       - name: initialize
         id: init
-        run: terraform init -backend-config="bucket=${{ github.event.repository.name }}" --backend-config="key=${{ needs.create_bucket.extract_branch.outputs.branch_name }}" --backend-config="region=us-west-2"
+        run: terraform init -backend-config="bucket=${{ secrets.S3_BUCKET }}" --backend-config="key=${{ github.event.repository.name }}/${{ steps.extract_branch.outputs.branch }}" --backend-config="region=us-west-2"
+
 
       - name: validate
         id: validate
